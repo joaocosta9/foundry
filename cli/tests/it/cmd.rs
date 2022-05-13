@@ -750,7 +750,7 @@ forgetest_async!(
             .await
             .add_sig("BroadcastTestNoLinking", "deployDoesntPanic()")
             .sim("SIMULATION COMPLETE. To broadcast these")
-            .execute("ONCHAIN EXECUTION COMPLETE & SUCCESSFUL")
+            .broadcast("ONCHAIN EXECUTION COMPLETE & SUCCESSFUL")
             .assert_nonce_increment(vec![(0, 1), (1, 2)])
             .await;
     })
@@ -768,7 +768,7 @@ forgetest_async!(
             .await
             .add_sig("BroadcastTest", "deploy()")
             .sim("SIMULATION COMPLETE. To broadcast these")
-            .execute("ONCHAIN EXECUTION COMPLETE & SUCCESSFUL")
+            .broadcast("ONCHAIN EXECUTION COMPLETE & SUCCESSFUL")
             .assert_nonce_increment(vec![(0, 2), (1, 1)])
             .await;
     })
@@ -815,7 +815,7 @@ forgetest_async!(
             .await
             .add_sig("BroadcastTest", "deployOther()")
             .sim("SIMULATION COMPLETE. To broadcast these")
-            .execute("ONCHAIN EXECUTION COMPLETE & SUCCESSFUL")
+            .broadcast("ONCHAIN EXECUTION COMPLETE & SUCCESSFUL")
             .assert_nonce_increment(vec![(0, 4), (1, 4), (2, 1)])
             .await;
     })

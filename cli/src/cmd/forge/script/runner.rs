@@ -23,7 +23,16 @@ impl<DB: DatabaseRef> Runner<DB> {
         libraries: &[Bytes],
         code: Bytes,
         setup: bool,
+        is_broadcast: bool,
     ) -> eyre::Result<(Address, ScriptResult)> {
+        if !is_broadcast {
+            // We max out their balance so that they can deploy and make calls.
+            self.executor.set_balance(self.sender, U256::MAX);
+
+            // We set the nonce of the deployer accounts to 1 to get the same addresses as DappTools
+            self.executor.set_nonce(self.sender, 1);
+        }
+
         // We max out their balance so that they can deploy and make calls.
         self.executor.set_balance(*CALLER, U256::MAX);
 
@@ -95,7 +104,16 @@ impl<DB: DatabaseRef> Runner<DB> {
 
         Ok((
             address,
-            ScriptResult { success, gas, labeled_addresses, transactions, logs, traces, debug },
+            ScriptResult {
+                returned: bytes::Bytes::new(),
+                success,
+                gas,
+                labeled_addresses,
+                transactions,
+                logs,
+                traces,
+                debug,
+            },
         ))
     }
 
@@ -123,6 +141,7 @@ impl<DB: DatabaseRef> Runner<DB> {
             )?;
 
             Ok(ScriptResult {
+                returned: bytes::Bytes::new(),
                 success: true,
                 gas,
                 logs,
@@ -151,7 +170,16 @@ impl<DB: DatabaseRef> Runner<DB> {
         commit: bool,
     ) -> eyre::Result<ScriptResult> {
         let RawCallResult {
-            reverted, gas, stipend, logs, traces, labels, debug, transactions, ..
+            result,
+            reverted,
+            gas,
+            stipend,
+            logs,
+            traces,
+            labels,
+            debug,
+            transactions,
+            ..
         } = if !commit {
             self.executor.call_raw(from, to, calldata.0, value)?
         } else {
@@ -159,6 +187,7 @@ impl<DB: DatabaseRef> Runner<DB> {
         };
 
         Ok(ScriptResult {
+            returned: result,
             success: !reverted,
             gas: gas.overflowing_sub(stipend).0,
             logs,
